@@ -4,10 +4,7 @@ import math
 from data import digit_0, digit_1, digit_2, digit_3, digit_4, digit_5, digit_6, digit_7, digit_8, digit_9
 from settings import rad, dia, line_length, line_width, dot_rad, wn, canvas, canvas_width, canvas_height, x_adj, y_adj, sp, hand_colour
 from settings import rotation_speed_hour, rotation_speed_minute, num_rotations_minute, num_rotations_hour, c_shdw_off, b_shdw_off, border, ani_speed
-# from test import rotate_line, stop_rotation
 
-# from time_functions import time_values, hand_directions, time_plot
-# from animation_functions import animated_hands
 
 
 current_function = 1
@@ -180,9 +177,7 @@ def plot_current_hour():
     """
     Plots current hour hands
     """
-    # canvas.delete("line")  # Clear previous lines
     canvas.delete("line_rotate_hour")
-    # start_coordinates = grid_centres()
     combined_list = [[pair[0], pair[1], angle] for pair, angle in zip(grid, hour_angle_current)]
     for a,b,c in combined_list:
         end_hour_x = a + math.sin(math.radians(c)) * line_length
@@ -194,9 +189,7 @@ def plot_current_minute():
     """
     Plots current minute hands
     """
-    # canvas.delete("line")  # Clear previous lines
     canvas.delete("line_rotate_minute")
-    # start_coordinates = grid_centres()
     combined_list = [[pair[0], pair[1], angle] for pair, angle in zip(grid, minute_angle_current)]
     for a,b,c in combined_list:
         end_hour_x = a + math.sin(math.radians(c)) * line_length
@@ -205,11 +198,11 @@ def plot_current_minute():
                            tags="line_time_minute", width=line_width, fill=hand_colour)
         
 
-
 def num_moves():
     """
     Calculate the number of moves each hand must make to get from
     current to future positions
+    store in lists
     """
     global num_moves_hour 
     global num_moves_minute
@@ -220,8 +213,7 @@ def num_moves():
     num_moves_minute = [math.floor((((start_angle - end_angle) + (360 * num_rotations_minute)) / rotation_speed_minute) + 1) 
                     for start_angle, end_angle in zip(minute_angle_current, minute_angle_future)]
 
-    # print(f"num moves hour: {num_moves_hour}")
-    # print(f"num moves minute: {num_moves_minute}")
+
 
 def rotate_hours():
     for i, (start_angle, end_angle) in enumerate(zip(hour_angle_current, hour_angle_future)):
@@ -255,22 +247,16 @@ def rotate_minute(start_angle, end_angle, center, count, move_count, index):
 # Start the rotation
 
 def animation():
-    # canvas.delete("line_time_hour")
-    # canvas.delete("line_time_minute")
     rotate_hours()
     rotate_minutes()
     canvas.after(55000, update_canvas)
 
-def update_time():
-    # canvas.delete("line_rotate_hour_{index}")
-    # canvas.delete("line_rotate_minute_{index}")
-    
+def update_time():    
     hand_angles(time_function())
     num_moves()
     plot_current_hour()
     plot_current_minute()
     canvas.after(5000, update_canvas)
-
 
 
 def update_canvas():
@@ -289,16 +275,7 @@ def update_canvas():
 time_function_result = time_function()
 hand_angles_result = hand_angles(time_function_result)
 grid = grid_centres()
-print(f"grid = {grid}")
-# print()
-# print(time_function())
-# print(f"hour_angle_current: {hour_angle_current}")
-# print()
-# print(f"minute_angle_current: {minute_angle_current}")
-# print()
-# print(f"hour_angle_future: {hour_angle_future}")
-# print()
-# print(f"minute_angle_future: {minute_angle_future}")
+
 
 background()
 update_canvas()
