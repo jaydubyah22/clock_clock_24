@@ -8,7 +8,10 @@ from settings import rotation_speed_hour, rotation_speed_minute, num_rotations_m
 
 
 current_function = 1
-# animation_start_time = None
+
+# Precomputed animation data (filled during the display phase)
+hour_angle_paths = None   # list[list[float]] length 24
+minute_angle_paths = None # list[list[float]] length 24
 
 def grid_centres(): 
     """
@@ -214,35 +217,75 @@ def num_moves():
                     for start_angle, end_angle in zip(minute_angle_current, minute_angle_future)]
 
 
+def calculate_data():
+    """
+    Pre-calculate all angles needed for the *next* animation phase.
+    Keeps the existing animation logic, but removes per-frame angle math.
+    """
+    global hour_angle_paths, minute_angle_paths
+
+    # Ensure we have the latest current/future angles + move counts
+    # (callers typically already did this, but keep it safe).
+    hand_angles(time_function())
+    num_moves()
+
+    hour_angle_paths = []
+    minute_angle_paths = []
+
+    # Precompute each clock's angle sequence including the final destination angle,
+    # so the hand never "disappears" at the end of the animation.
+    for start_angle, end_angle, moves in zip(hour_angle_current, hour_angle_future, num_moves_hour):
+        path = [((start_angle - rotation_speed_hour * step) % 360) for step in range(max(moves, 0))]
+        path.append(end_angle % 360)
+        hour_angle_paths.append(path)
+
+    for start_angle, end_angle, moves in zip(minute_angle_current, minute_angle_future, num_moves_minute):
+        path = [((start_angle - rotation_speed_minute * step) % 360) for step in range(max(moves, 0))]
+        path.append(end_angle % 360)
+        minute_angle_paths.append(path)
+
+
 
 def rotate_hours():
-    for i, (start_angle, end_angle) in enumerate(zip(hour_angle_current, hour_angle_future)):
-        rotate_hour(start_angle, end_angle, grid[i], 0, num_moves_hour[i], i)
+    for i in range(len(grid)):
+        rotate_hour(grid[i], 0, i)
 
 # Function to rotate minute lines
 def rotate_minutes():
-    for i, (start_angle, end_angle) in enumerate(zip(minute_angle_current, minute_angle_future)):
-        rotate_minute(start_angle, end_angle, grid[i], 0, num_moves_minute[i], i)
+    for i in range(len(grid)):
+        rotate_minute(grid[i], 0, i)
 
-# Function to rotate hour line
-def rotate_hour(start_angle, end_angle, center, count, move_count, index):
-    if count < move_count:
-        canvas.delete(f"line_rotate_hour_{index}")  # Clear previous line
-        end_x = center[0] + math.sin(math.radians(start_angle)) * line_length
-        end_y = center[1] + math.cos(math.radians(start_angle)) * line_length
-        canvas.create_line(center[0], center[1], end_x, end_y, tags=f"line_rotate_hour_{index}", width=line_width, fill=hand_colour)
-        new_angle = (start_angle - rotation_speed_hour) % 360
-        wn.after(ani_speed, rotate_hour, new_angle, end_angle, center, count + 1, move_count, index)
+# Function to rotate hour line (precomputed-only)
+def rotate_hour(center, count, index):
+    path = hour_angle_paths[index]
+    if count >= len(path):
+        return
 
-# Function to rotate minute line
-def rotate_minute(start_angle, end_angle, center, count, move_count, index):
-    if count < move_count:
-        canvas.delete(f"line_rotate_minute_{index}")  # Clear previous line
-        end_x = center[0] + math.sin(math.radians(start_angle)) * line_length
-        end_y = center[1] + math.cos(math.radians(start_angle)) * line_length
-        canvas.create_line(center[0], center[1], end_x, end_y, tags=f"line_rotate_minute_{index}", width=line_width, fill=hand_colour)
-        new_angle = (start_angle - rotation_speed_minute) % 360
-        wn.after(ani_speed, rotate_minute, new_angle, end_angle, center, count + 1, move_count, index)
+    angle = path[count]
+    canvas.delete(f"line_rotate_hour_{index}")  # Clear previous line
+    end_x = center[0] + math.sin(math.radians(angle)) * line_length
+    end_y = center[1] + math.cos(math.radians(angle)) * line_length
+    canvas.create_line(center[0], center[1], end_x, end_y,
+                       tags=f"line_rotate_hour_{index}", width=line_width, fill=hand_colour)
+
+    if count + 1 < len(path):
+        wn.after(ani_speed, rotate_hour, center, count + 1, index)
+
+# Function to rotate minute line (precomputed-only)
+def rotate_minute(center, count, index):
+    path = minute_angle_paths[index]
+    if count >= len(path):
+        return
+
+    angle = path[count]
+    canvas.delete(f"line_rotate_minute_{index}")  # Clear previous line
+    end_x = center[0] + math.sin(math.radians(angle)) * line_length
+    end_y = center[1] + math.cos(math.radians(angle)) * line_length
+    canvas.create_line(center[0], center[1], end_x, end_y,
+                       tags=f"line_rotate_minute_{index}", width=line_width, fill=hand_colour)
+
+    if count + 1 < len(path):
+        wn.after(ani_speed, rotate_minute, center, count + 1, index)
 
 # Start the rotation
 
@@ -256,6 +299,8 @@ def update_time():
     num_moves()
     plot_current_hour()
     plot_current_minute()
+    # Precompute the upcoming animation while we are in the display phase
+    calculate_data()
     canvas.after(5000, update_canvas)
 
 
