@@ -24,7 +24,6 @@ def grid_centres():
             coord_tuple += (((x * dia) + rad + (x * sp) + x_adj, (y * dia) + rad + (y * sp) + y_adj,),) 
     return coord_tuple
 
-
 def background():
     """
     Draws background
@@ -71,8 +70,6 @@ def background():
         x1 = (x + dot_rad)
         y1 = (y + dot_rad)
         canvas.create_oval(x - dot_rad, y - dot_rad, x1, y1, outline="black", fill=hand_colour)
-
-
 
 def time_function():
     """
@@ -128,7 +125,6 @@ def time_function():
 
     return time_digits
 
-
 def hand_angles(time_values):
     """
     Outputs a list of pairs (hour hand and minute hand) with the angles for each clock
@@ -175,7 +171,6 @@ def hand_angles(time_values):
 
     return result_hand_angles
 
-
 def plot_current_hour():
     """
     Plots current hour hands
@@ -200,7 +195,6 @@ def plot_current_minute():
         canvas.create_line(a, b, end_hour_x, end_hour_y, 
                            tags="line_time_minute", width=line_width, fill=hand_colour)
         
-
 def num_moves():
     """
     Calculate the number of moves each hand must make to get from
@@ -215,7 +209,6 @@ def num_moves():
     
     num_moves_minute = [math.floor((((start_angle - end_angle) + (360 * num_rotations_minute)) / rotation_speed_minute) + 1) 
                     for start_angle, end_angle in zip(minute_angle_current, minute_angle_future)]
-
 
 def calculate_data():
     """
@@ -244,18 +237,14 @@ def calculate_data():
         path.append(end_angle % 360)
         minute_angle_paths.append(path)
 
-
-
 def rotate_hours():
     for i in range(len(grid)):
         rotate_hour(grid[i], 0, i)
 
-# Function to rotate minute lines
 def rotate_minutes():
     for i in range(len(grid)):
         rotate_minute(grid[i], 0, i)
 
-# Function to rotate hour line (precomputed-only)
 def rotate_hour(center, count, index):
     path = hour_angle_paths[index]
     if count >= len(path):
@@ -271,7 +260,6 @@ def rotate_hour(center, count, index):
     if count + 1 < len(path):
         wn.after(ani_speed, rotate_hour, center, count + 1, index)
 
-# Function to rotate minute line (precomputed-only)
 def rotate_minute(center, count, index):
     path = minute_angle_paths[index]
     if count >= len(path):
@@ -302,7 +290,6 @@ def update_time():
     # Precompute the upcoming animation while we are in the display phase
     calculate_data()
     canvas.after(5000, update_canvas)
-
 
 def update_canvas():
     global current_function
