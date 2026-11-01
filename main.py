@@ -4,11 +4,11 @@ import math
 from data import digit_0, digit_1, digit_2, digit_3, digit_4, digit_5, digit_6, digit_7, digit_8, digit_9
 from settings import rad, dia, line_length, line_width, dot_rad, wn, canvas, canvas_width, canvas_height, x_adj, y_adj, sp, hand_colour
 from settings import rotation_speed_hour, rotation_speed_minute, num_rotations_minute, num_rotations_hour, c_shdw_off, b_shdw_off, border, ani_speed
-
+from animation import interpolated_angle, rotation_distance, shared_frame_count
 
 
 current_function = 1
-# animation_start_time = None
+
 
 def grid_centres(): 
     """
@@ -70,27 +70,19 @@ def background():
         canvas.create_oval(x - dot_rad, y - dot_rad, x1, y1, outline="black", fill=hand_colour)
 
 
-
 def time_function():
     """
     Calculates current and future time, outputs a list of 2 lists of 4 elements
     [[c1, c2, c3, c4], [f1, f2, f3, f4]]
     """
-    
-    # Get the current time
     current_time = datetime.now()
     future_time = current_time + timedelta(minutes=1)
-    # print(current_time)
-    # print(future_time)
 
-    # Extract the hours and minutes as integers
     hour_current = int(current_time.strftime("%H"))
     minute_current = int(current_time.strftime("%M"))
     hour_future = int(future_time.strftime("%H"))
     minute_future = int(future_time.strftime("%M"))
 
-    # Split hours and minutes into two digits for each, adding a 0 if 9 or lower    
-    # Current time
     if hour_current <= 9:
         hour_str_current = '0' + str(hour_current)
     else:
@@ -100,7 +92,6 @@ def time_function():
     else:
         minute_str_current = str(minute_current)
 
-    # Future time
     if hour_future <= 9:
         hour_str_future = '0' + str(hour_future)
     else:
@@ -131,8 +122,6 @@ def hand_angles(time_values):
     Outputs a list of pairs (hour hand and minute hand) with the angles for each clock
     for current and future time
     """
-    
-    #tuple to map time digits to angles
     digits = ((0, digit_0), (1, digit_1), (2, digit_2), (3, digit_3), (4, digit_4), (5, digit_5),
               (6, digit_6), (7, digit_7), (8, digit_8), (9, digit_9))
 
@@ -146,15 +135,10 @@ def hand_angles(time_values):
     minutes_future_1 = digits[time_values[1][2]]
     minutes_future_2 = digits[time_values[1][3]]
 
-    #Build the tuple
     result_hand_angles_current_tuple = (hours_current_1, hours_current_2, minutes_current_1, minutes_current_2) 
     result_hand_angles_future_tuple = (hours_future_1, hours_future_2, minutes_future_1, minutes_future_2)
     result_hand_angles_tuple = ((result_hand_angles_current_tuple), (result_hand_angles_future_tuple))
-    # print(f"This: {result_hand_angles_tuple}")
-    # Remove the time digit from the tuple and start list conversion
     result_hand_angles_int = [list(pair[1]) for group in result_hand_angles_tuple for pair in group]
-    # print(f"Hello: {result_hand_angles_int}")
-    # Fully convert to a list
     result_hand_angles_a = [list(pair) for group in result_hand_angles_int for pair in group]
     global hand_angles_current
     hand_angles_current = result_hand_angles_a[:24]
@@ -174,9 +158,7 @@ def hand_angles(time_values):
 
 
 def plot_current_hour():
-    """
-    Plots current hour hands
-    """
+    """Plots current hour hands."""
     canvas.delete("line_rotate_hour")
     combined_list = [[pair[0], pair[1], angle] for pair, angle in zip(grid, hour_angle_current)]
     for a,b,c in combined_list:
@@ -185,10 +167,9 @@ def plot_current_hour():
         canvas.create_line(a, b, end_hour_x, end_hour_y, 
                            tags="line_time_hour", width=line_width, fill=hand_colour)
 
+
 def plot_current_minute():
-    """
-    Plots current minute hands
-    """
+    """Plots current minute hands."""
     canvas.delete("line_rotate_minute")
     combined_list = [[pair[0], pair[1], angle] for pair, angle in zip(grid, minute_angle_current)]
     for a,b,c in combined_list:
@@ -199,57 +180,64 @@ def plot_current_minute():
         
 
 def num_moves():
-    """
-    Calculate the number of moves each hand must make to get from
-    current to future positions
-    store in lists
-    """
-    global num_moves_hour 
-    global num_moves_minute
-    
-    num_moves_hour = [math.floor((((start_angle - end_angle) + (360 * num_rotations_hour)) / rotation_speed_hour) + 1) 
-                      for start_angle, end_angle in zip(hour_angle_current, hour_angle_future)]
-    
-    num_moves_minute = [math.floor((((start_angle - end_angle) + (360 * num_rotations_minute)) / rotation_speed_minute) + 1) 
-                    for start_angle, end_angle in zip(minute_angle_current, minute_angle_future)]
+    """Calculate each hand's distance and one shared animation frame count."""
+    global hour_rotation_distances
+    global minute_rotation_distances
+    global animation_frames
 
+    hour_rotation_distances = [
+        rotation_distance(start_angle, end_angle, num_rotations_hour)
+        for start_angle, end_angle in zip(hour_angle_current, hour_angle_future)
+    ]
+    minute_rotation_distances = [
+        rotation_distance(start_angle, end_angle, num_rotations_minute)
+        for start_angle, end_angle in zip(minute_angle_current, minute_angle_future)
+    ]
+    animation_frames = shared_frame_count(
+        hour_rotation_distances,
+        minute_rotation_distances,
+        rotation_speed_hour,
+        rotation_speed_minute,
+    )
 
 
 def rotate_hours():
-    for i, (start_angle, end_angle) in enumerate(zip(hour_angle_current, hour_angle_future)):
-        rotate_hour(start_angle, end_angle, grid[i], 0, num_moves_hour[i], i)
+    for i, start_angle in enumerate(hour_angle_current):
+        rotate_hour(start_angle, hour_rotation_distances[i], grid[i], 0, animation_frames, i)
 
-# Function to rotate minute lines
+
 def rotate_minutes():
-    for i, (start_angle, end_angle) in enumerate(zip(minute_angle_current, minute_angle_future)):
-        rotate_minute(start_angle, end_angle, grid[i], 0, num_moves_minute[i], i)
+    for i, start_angle in enumerate(minute_angle_current):
+        rotate_minute(start_angle, minute_rotation_distances[i], grid[i], 0, animation_frames, i)
 
-# Function to rotate hour line
-def rotate_hour(start_angle, end_angle, center, count, move_count, index):
-    if count < move_count:
-        canvas.delete(f"line_rotate_hour_{index}")  # Clear previous line
-        end_x = center[0] + math.sin(math.radians(start_angle)) * line_length
-        end_y = center[1] + math.cos(math.radians(start_angle)) * line_length
-        canvas.create_line(center[0], center[1], end_x, end_y, tags=f"line_rotate_hour_{index}", width=line_width, fill=hand_colour)
-        new_angle = (start_angle - rotation_speed_hour) % 360
-        wn.after(ani_speed, rotate_hour, new_angle, end_angle, center, count + 1, move_count, index)
 
-# Function to rotate minute line
-def rotate_minute(start_angle, end_angle, center, count, move_count, index):
-    if count < move_count:
-        canvas.delete(f"line_rotate_minute_{index}")  # Clear previous line
-        end_x = center[0] + math.sin(math.radians(start_angle)) * line_length
-        end_y = center[1] + math.cos(math.radians(start_angle)) * line_length
-        canvas.create_line(center[0], center[1], end_x, end_y, tags=f"line_rotate_minute_{index}", width=line_width, fill=hand_colour)
-        new_angle = (start_angle - rotation_speed_minute) % 360
-        wn.after(ani_speed, rotate_minute, new_angle, end_angle, center, count + 1, move_count, index)
+def rotate_hour(start_angle, distance, center, frame, total_frames, index):
+    canvas.delete(f"line_rotate_hour_{index}")
+    angle = interpolated_angle(start_angle, distance, frame, total_frames)
+    end_x = center[0] + math.sin(math.radians(angle)) * line_length
+    end_y = center[1] + math.cos(math.radians(angle)) * line_length
+    canvas.create_line(center[0], center[1], end_x, end_y, tags=f"line_rotate_hour_{index}", width=line_width, fill=hand_colour)
 
-# Start the rotation
+    if frame < total_frames:
+        wn.after(ani_speed, rotate_hour, start_angle, distance, center, frame + 1, total_frames, index)
+
+
+def rotate_minute(start_angle, distance, center, frame, total_frames, index):
+    canvas.delete(f"line_rotate_minute_{index}")
+    angle = interpolated_angle(start_angle, distance, frame, total_frames)
+    end_x = center[0] + math.sin(math.radians(angle)) * line_length
+    end_y = center[1] + math.cos(math.radians(angle)) * line_length
+    canvas.create_line(center[0], center[1], end_x, end_y, tags=f"line_rotate_minute_{index}", width=line_width, fill=hand_colour)
+
+    if frame < total_frames:
+        wn.after(ani_speed, rotate_minute, start_angle, distance, center, frame + 1, total_frames, index)
+
 
 def animation():
     rotate_hours()
     rotate_minutes()
     canvas.after(55000, update_canvas)
+
 
 def update_time():    
     hand_angles(time_function())
@@ -271,11 +259,9 @@ def update_canvas():
         current_function = 1  
 
 
-
 time_function_result = time_function()
 hand_angles_result = hand_angles(time_function_result)
 grid = grid_centres()
-
 
 background()
 update_canvas()
