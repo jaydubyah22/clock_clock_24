@@ -29,6 +29,7 @@ class ClockView:
         self.canvas.delete("all")
         self._hands.clear()
         radius = self._radius
+        hand_width = max(1, radius * 0.1)
         left, top = self._centers[0]
         right, bottom = self._centers[-1]
         border = radius * 1.5
@@ -75,20 +76,21 @@ class ClockView:
                     x,
                     y,
                     fill=self.settings.hand_color,
-                    width=max(1, radius / 7),
-                    capstyle=tk.ROUND,
+                    width=hand_width,
+                    capstyle=tk.BUTT,
                 )
                 for _ in range(2)
             )
             self._hands.append(hands)
-            dot_radius = radius * 0.057
+            # The circular hub rounds the inner ends; outer tips remain square.
+            dot_radius = hand_width / 2
             self.canvas.create_oval(
                 x - dot_radius,
                 y - dot_radius,
                 x + dot_radius,
                 y + dot_radius,
                 fill=self.settings.hand_color,
-                outline=self.settings.hand_color,
+                outline="",
             )
         self.render(self._state)
 
@@ -96,7 +98,7 @@ class ClockView:
         self._state = state
         for center, hands, angles in zip(self._centers, self._hands, state):
             for hand, angle in zip(hands, angles):
-                endpoint = hand_endpoint(center, angle, self._radius * 0.99)
+                endpoint = hand_endpoint(center, angle, self._radius * 0.891)
                 self.canvas.coords(hand, *center, *endpoint)
 
 
