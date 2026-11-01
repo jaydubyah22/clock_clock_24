@@ -1,77 +1,34 @@
-# Create main window
-import tkinter as tk
-wn = tk.Tk()
-wn.title("ClockClock24")
-wn.configure(bg="white")
-# wn.state('zoomed')
-wn.attributes('-fullscreen', True)
+"""Configuration without GUI side effects."""
+
+from dataclasses import dataclass
+from math import isfinite
 
 
-# Set screen dimensions
-screen_width = 1600
-screen_height = 1200
+@dataclass(frozen=True)
+class Settings:
+    """Speeds are maximum degrees per second, independent of refresh rate."""
 
-# Set window size
-window_width = screen_width
-window_height = screen_height 
+    width: int = 1600
+    height: int = 900
+    fullscreen: bool = True
+    frame_interval_ms: int = 20
+    hour_speed: float = 50.0
+    minute_speed: float = 25.0
+    rotations: int = 1
+    hand_color: str = "#282828"
 
-# Set window position to center
-x = (screen_width - window_width) // 2
-y = (screen_height - window_height) // 2
-
-# Set window size and position
-wn.geometry(f"{window_width}x{window_height}+{x}+{y}")
-
-# Set the canvas dimensions
-canvas_width = (1 * window_width)
-canvas_height = (1 * window_height)
-
-# Create a canvas 
-canvas = tk.Canvas(wn, width=canvas_width, height=canvas_height)
-canvas.place(relx = 0.5, rely = 0.5, anchor=tk.CENTER)
-canvas.configure(bg="white")
-
-# Define clock radius:
-rad = 70
-# Define clock diameter
-dia = rad * 2
-# Define spacing between clocks
-sp = 0.15 * rad
-# Define length of clock hand
-line_length = rad * 0.99
-line_width = 10
-
-# Define hand colour
-hand_colour = "#282828"
-
-# Border around clock grid
-border = 0.5 * rad
-
-# Box shadow offset
-b_shdw_off = 0.5 * rad
-
-# Circle shadow offset
-c_shdw_off = 0.06 * rad
-
-#Center clocks on canvas
-x_adj = (canvas_width - (8 * dia + 7 * sp)) / 2
-y_adj = (canvas_height - (3 * dia + 2 * sp)) / 2
-
-# Define dot radius
-dot_rad = 4
-
-# Define the rotation speed
-rotation_speed_hour = 1  # Adjust the speed as needed
-rotation_speed_minute = 0.5  # Adjust the speed as needed
-
-# Set animate speed
-ani_speed = 20 # lower is faster
-
-# Define the number of rotations
-num_rotations_hour = 1
-num_rotations_minute = 1
-
-
-
-
-
+    def __post_init__(self) -> None:
+        for name in ("width", "height", "frame_interval_ms"):
+            value = getattr(self, name)
+            if not isinstance(value, int) or isinstance(value, bool) or value <= 0:
+                raise ValueError(f"{name} must be a positive integer")
+        for name in ("hour_speed", "minute_speed"):
+            value = getattr(self, name)
+            if not isfinite(value) or value <= 0:
+                raise ValueError(f"{name} must be finite and positive")
+        if (
+            not isinstance(self.rotations, int)
+            or isinstance(self.rotations, bool)
+            or self.rotations < 0
+        ):
+            raise ValueError("rotations must be a nonnegative integer")
