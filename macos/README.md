@@ -18,6 +18,18 @@ and select it. Reopen System Settings if it was open during installation.
 The bundle is locally ad-hoc signed; it is not a notarized distribution.
 The universal binary supports Apple Silicon and Intel Macs running macOS 11+.
 
+For the dark version, build and install separately:
+
+```sh
+sh macos/build.sh --dark
+ditto macos/build/ClockClock24Dark.saver "$HOME/Library/Screen Savers/ClockClock24Dark.saver"
+```
+
+Select **ClockClock24Dark** in Screen Saver settings. It uses a near-black
+background, charcoal panel and faces, and pale hands. Both versions can be
+installed together: they use distinct bundle identifiers and view classes.
+The dark version always uses its dark palette, regardless of macOS appearance.
+
 `Digits.h` contains the digit artwork from `data.py`. `Choreography.h` contains
 stateless motion sampling, so previews and waking from sleep use the same phase.
 The animation is chosen randomly each minute, with no consecutive repeats.

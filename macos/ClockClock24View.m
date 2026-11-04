@@ -5,12 +5,19 @@
 #import "Choreography.h"
 #import "StyleSelection.h"
 
-@interface ClockClock24View : ScreenSaverView {
+#ifndef CC_VIEW_CLASS
+#define CC_VIEW_CLASS ClockClock24View
+#endif
+#ifndef CC_DARK_MODE
+#define CC_DARK_MODE 0
+#endif
+
+@interface CC_VIEW_CLASS : ScreenSaverView {
     CCStyleSelection _styleSelection;
 }
 @end
 
-@implementation ClockClock24View
+@implementation CC_VIEW_CLASS
 - (instancetype)initWithFrame:(NSRect)frame isPreview:(BOOL)preview {
     self = [super initWithFrame:frame isPreview:preview];
     if (self) self.animationTimeInterval = 1.0 / 50.0;
@@ -20,7 +27,20 @@
 - (void)animateOneFrame { [self setNeedsDisplay:YES]; }
 - (void)drawRect:(NSRect)dirtyRect {
     (void)dirtyRect;
-    [[NSColor whiteColor] setFill];
+#if CC_DARK_MODE
+    NSColor *backgroundColor = [NSColor colorWithSRGBRed:12.0/255 green:12.0/255 blue:12.0/255 alpha:1];
+    NSColor *grey = [NSColor colorWithSRGBRed:5.0/255 green:5.0/255 blue:5.0/255 alpha:1];
+    NSColor *panelColor = [NSColor colorWithSRGBRed:28.0/255 green:28.0/255 blue:28.0/255 alpha:1];
+    NSColor *faceColor = [NSColor colorWithSRGBRed:40.0/255 green:40.0/255 blue:40.0/255 alpha:1];
+    NSColor *handColor = [NSColor colorWithSRGBRed:230.0/255 green:230.0/255 blue:230.0/255 alpha:1];
+#else
+    NSColor *backgroundColor = [NSColor whiteColor];
+    NSColor *grey = [NSColor colorWithSRGBRed:211.0/255 green:211.0/255 blue:211.0/255 alpha:1];
+    NSColor *panelColor = [NSColor colorWithSRGBRed:250.0/255 green:250.0/255 blue:250.0/255 alpha:1];
+    NSColor *faceColor = [NSColor colorWithSRGBRed:240.0/255 green:240.0/255 blue:240.0/255 alpha:1];
+    NSColor *handColor = [NSColor colorWithSRGBRed:40.0/255 green:40.0/255 blue:40.0/255 alpha:1];
+#endif
+    [backgroundColor setFill];
     NSRectFill(self.bounds);
     NSDate *now = [NSDate date];
     NSCalendar *calendar = [NSCalendar currentCalendar];
@@ -41,10 +61,6 @@
     CGFloat y0 = NSMidY(self.bounds) - height / 2 + radius;
     NSRect panel = NSMakeRect(x0 - 1.5 * radius, y0 - 1.5 * radius, width + radius, height + radius);
     // Match the original main.py panel, including its box-shadow corner triangles.
-    NSColor *grey = [NSColor colorWithSRGBRed:211.0/255 green:211.0/255 blue:211.0/255 alpha:1];
-    NSColor *panelColor = [NSColor colorWithSRGBRed:250.0/255 green:250.0/255 blue:250.0/255 alpha:1];
-    NSColor *faceColor = [NSColor colorWithSRGBRed:240.0/255 green:240.0/255 blue:240.0/255 alpha:1];
-    NSColor *handColor = [NSColor colorWithSRGBRed:40.0/255 green:40.0/255 blue:40.0/255 alpha:1];
     [grey setFill];
     [grey setStroke];
     CGFloat boxOffset = radius * 0.5;

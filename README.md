@@ -11,6 +11,16 @@ minute boundary.
 **Requires macOS 11 or later. Supports Apple Silicon and Intel.**
 No Python or additional software is needed for the download.
 
+Choose your appearance:
+
+- [Light — ClockClock24](https://github.com/jaydubyah22/clock_clock_24/raw/refs/heads/main/downloads/ClockClock24-macOS.zip)
+- [Dark — ClockClock24Dark](https://github.com/jaydubyah22/clock_clock_24/raw/refs/heads/main/downloads/ClockClock24Dark-macOS.zip)
+
+The dark version has a near-black background, charcoal clock faces, and pale
+hands. Both versions have the same random animations and can be installed
+together. For the dark download, follow the steps below using
+**ClockClock24Dark.saver** and select **ClockClock24Dark** in Screen Saver settings.
+
 1. [Download ClockClock24 for macOS](https://github.com/jaydubyah22/clock_clock_24/raw/refs/heads/main/downloads/ClockClock24-macOS.zip).
 2. Double-click the ZIP in Finder to extract **ClockClock24.saver**.
 3. Double-click **ClockClock24.saver** and choose **Install for this user only**
@@ -47,6 +57,7 @@ in so macOS reloads the bundle.
 ### Verify the download
 
 Download the [SHA-256 checksum](downloads/ClockClock24-macOS.zip.sha256).
+For the dark download, use its [SHA-256 checksum](downloads/ClockClock24Dark-macOS.zip.sha256).
 From the folder containing the ZIP, compare its output with the checksum file:
 
 ```sh
@@ -66,6 +77,8 @@ ditto macos/build/ClockClock24.saver "$HOME/Library/Screen Savers/ClockClock24.s
 ```
 
 See [macOS documentation](macos/README.md) for the ten animations and motion tests.
+To build the dark version, run `sh macos/build.sh --dark`; the output is
+`macos/build/ClockClock24Dark.saver`.
 
 ### Uninstall
 
