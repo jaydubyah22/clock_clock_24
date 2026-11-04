@@ -1,5 +1,83 @@
 # ClockClock24
 
+A native macOS screensaver inspired by ClockClock24, with 24 clock faces and
+48 hands forming the local 24-hour time. Ten original animations cycle through
+waves, opposing gears, ripples, spirals, mirrored formations, and reversals.
+Hands vary their speed and direction, then slow smoothly into position at the
+minute boundary.
+
+## Install the macOS screensaver
+
+**Requires macOS 11 or later. Supports Apple Silicon and Intel.**
+No Python or additional software is needed for the download.
+
+1. [Download ClockClock24 for macOS](https://github.com/jaydubyah22/clock_clock_24/raw/refs/heads/main/downloads/ClockClock24-macOS.zip).
+2. Double-click the ZIP in Finder to extract **ClockClock24.saver**.
+3. Double-click **ClockClock24.saver** and choose **Install for this user only**
+   if macOS offers that choice.
+4. Open **System Settings → Screen Saver**, select **ClockClock24** (usually
+   under **Other**), and choose **Preview**. On older macOS versions, use
+   **System Preferences → Desktop & Screen Saver**.
+
+The current time holds for 32 seconds; movement fills the final 28 seconds
+before the next minute. Leave the preview running to see the transitions.
+All ten animations appear over ten minutes.
+
+The bundle is locally ad-hoc signed, rather than Apple-notarized. If macOS
+blocks it, try Control-click → **Open** in Finder; if available, use
+**System Settings → Privacy & Security → Open Anyway** after attempting to
+open it. Only approve the download if you trust its source. You can also build
+the screensaver yourself using the instructions below.
+
+### Manual install or update
+
+After extracting the ZIP into Downloads, quit System Settings and run:
+
+```sh
+mkdir -p "$HOME/Library/Screen Savers"
+ditto "$HOME/Downloads/ClockClock24.saver" "$HOME/Library/Screen Savers/ClockClock24.saver"
+```
+
+Reopen System Settings and select ClockClock24. When updating, exit any running
+screensaver preview first. If the old animation still appears, log out and back
+in so macOS reloads the bundle.
+
+### Verify the download
+
+Download the [SHA-256 checksum](downloads/ClockClock24-macOS.zip.sha256).
+From the folder containing the ZIP, compare its output with the checksum file:
+
+```sh
+shasum -a 256 ClockClock24-macOS.zip
+```
+
+### Build from source
+
+Install Apple's Command Line Tools (`xcode-select --install`), then:
+
+```sh
+git clone https://github.com/jaydubyah22/clock_clock_24.git
+cd clock_clock_24
+sh macos/build.sh
+mkdir -p "$HOME/Library/Screen Savers"
+ditto macos/build/ClockClock24.saver "$HOME/Library/Screen Savers/ClockClock24.saver"
+```
+
+See [macOS documentation](macos/README.md) for the ten animations and motion tests.
+
+### Uninstall
+
+Select another screensaver, quit System Settings, and move
+`~/Library/Screen Savers/ClockClock24.saver` to the Trash.
+In Finder, use **Go → Go to Folder** to open `~/Library/Screen Savers`.
+
+This is an independent project inspired by Humans since 1982's ClockClock24;
+it is not affiliated with or endorsed by its creators.
+
+---
+
+## Python application
+
 A 24-hour digital clock drawn with 24 analog clock faces in Tkinter.
 The original digit artwork is preserved: four digits, each made from a
 two-column, three-row grid of clocks.
