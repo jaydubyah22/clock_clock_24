@@ -1,9 +1,13 @@
 #import <ScreenSaver/ScreenSaver.h>
 #import <math.h>
+#import <stdlib.h>
 #import "Digits.h"
 #import "Choreography.h"
+#import "StyleSelection.h"
 
-@interface ClockClock24View : ScreenSaverView
+@interface ClockClock24View : ScreenSaverView {
+    CCStyleSelection _styleSelection;
+}
 @end
 
 @implementation ClockClock24View
@@ -24,9 +28,9 @@
     NSDateComponents *next = [calendar components:NSCalendarUnitHour | NSCalendarUnitMinute fromDate:[now dateByAddingTimeInterval:60]];
     NSInteger from[4] = {current.hour / 10, current.hour % 10, current.minute / 10, current.minute % 10};
     NSInteger to[4] = {next.hour / 10, next.hour % 10, next.minute / 10, next.minute % 10};
-    // Cycle all ten choreographies using absolute minutes, including across hours.
+    // Keep a random choreography for the whole minute, including after wake.
     long long minute = (long long)floor(now.timeIntervalSince1970 / 60.0);
-    int style = (int)((minute % CC_STYLE_COUNT + CC_STYLE_COUNT) % CC_STYLE_COUNT);
+    int style = ccStyleForMinute(&_styleSelection, minute, arc4random_uniform);
     double elapsed = current.second + current.nanosecond / 1e9;
     double progress = ccClamp((elapsed - (60 - CC_TRANSITION_SECONDS)) / CC_TRANSITION_SECONDS);
     CGFloat radius = fmin(NSWidth(self.bounds) / 20.0, NSHeight(self.bounds) / 9.0);

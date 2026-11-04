@@ -20,7 +20,10 @@ The universal binary supports Apple Silicon and Intel Macs running macOS 11+.
 
 `Digits.h` contains the digit artwork from `data.py`. `Choreography.h` contains
 stateless motion sampling, so previews and waking from sleep use the same phase.
-The ten sequences cycle once every ten minutes:
+The animation is chosen randomly each minute, with no consecutive repeats.
+Each choice stays fixed throughout that minute, including across redraws and
+resizing. A new minute after waking or a clock change makes a fresh choice.
+All ten sequences are available; their order is not a fixed cycle:
 
 1. **Silk sweep** — clockwise turns with faster and slower paired hands.
 2. **Counterpoint** — paired hands turn in opposite directions at different speeds.
@@ -47,6 +50,8 @@ slowdown, and frame continuity):
 ```sh
 xcrun clang -Wall -Wextra -Werror macos/tests/choreography.c -o /tmp/clockclock24-choreography-test
 /tmp/clockclock24-choreography-test
+xcrun clang -Wall -Wextra -Werror macos/tests/style_selection.c -o /tmp/clockclock24-style-test
+/tmp/clockclock24-style-test
 ```
 
 Implementation follows Apple's ScreenSaverView API:

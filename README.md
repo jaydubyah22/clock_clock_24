@@ -1,7 +1,7 @@
 # ClockClock24
 
 A native macOS screensaver inspired by ClockClock24, with 24 clock faces and
-48 hands forming the local 24-hour time. Ten original animations cycle through
+48 hands forming the local 24-hour time. Ten original animations are chosen randomly each minute, featuring
 waves, opposing gears, ripples, spirals, mirrored formations, and reversals.
 Hands vary their speed and direction, then slow smoothly into position at the
 minute boundary.
@@ -21,7 +21,9 @@ No Python or additional software is needed for the download.
 
 The current time holds for 32 seconds; movement fills the final 28 seconds
 before the next minute. Leave the preview running to see the transitions.
-All ten animations appear over ten minutes.
+Each minute chooses randomly from the ten animations, without repeating the
+previous animation. The order changes each session; seeing all ten may take
+longer than ten minutes.
 
 The bundle is locally ad-hoc signed, rather than Apple-notarized. If macOS
 blocks it, try Control-click → **Open** in Finder; if available, use

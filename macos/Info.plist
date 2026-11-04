@@ -5,8 +5,8 @@
 <key>CFBundleName</key><string>ClockClock24</string>
 <key>CFBundleExecutable</key><string>ClockClock24</string>
 <key>CFBundlePackageType</key><string>BNDL</string>
-<key>CFBundleVersion</key><string>1</string>
-<key>CFBundleShortVersionString</key><string>1.0</string>
+<key>CFBundleVersion</key><string>2</string>
+<key>CFBundleShortVersionString</key><string>1.1</string>
 <key>NSPrincipalClass</key><string>ClockClock24View</string>
 <key>LSMinimumSystemVersion</key><string>11.0</string>
 </dict></plist>
